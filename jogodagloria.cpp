@@ -1,7 +1,6 @@
 #include <iostream>
-#include <vector> //Permite acesso aleatório rápido a qualquer elemento usando o operador subscrito [] ou iteradores
 #include <string>
-#include <cstdlib> //Gerir números, memória, aleatoriedade e controlo do programa.
+#include <cstdlib>
 #include <ctime>
 
 using namespace std;
@@ -17,48 +16,46 @@ int dado() {
     return rand() % 6 + 1;
 }
 
-bool todosUltrapassaram(const Jogador& j, const vector<Jogador>& jogadores) {
-    for (const auto& outro : jogadores) {
-        if (outro.nome != j.nome && outro.pos <= j.pos)
+bool todosUltrapassaram(const Jogador& j, Jogador jogadores[], int num) {
+    for (int i = 0; i < num; i++) {
+        if (jogadores[i].nome != j.nome && jogadores[i].pos <= j.pos)
             return false;
     }
     return true;
 }
 
 void limparEcra() {
-    // Sistema Windows
-    #ifdef _WIN32
-        system("cls");
-    // Sistema Unix/Linux/MacOS
-    #else
-        system("clear");
-    #endif
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
 
-void mostrarTabuleiro(const vector<Jogador>& jogadores) {
-    limparEcra(); // Limpa o ecrã antes de mostrar o tabuleiro atualizado
-    
+void mostrarTabuleiro(Jogador jogadores[], int num) {
+    limparEcra();
+
     cout << "\n-------------------- TABULEIROZAO ---------------------\n";
     for (int i = 1; i <= 30; i++) {
         bool temJogador = false;
-        for (auto& j : jogadores) {
-            if (j.pos == i) {
-                cout << "[" << j.nome[0] << "]";
+        for (int j = 0; j < num; j++) {
+            if (jogadores[j].pos == i) {
+                cout << "[" << jogadores[j].nome[0] << "]";
                 temJogador = true;
                 break;
             }
         }
 
         if (!temJogador) {
-            if (i == 5) cout << "[⏩]";
-            else if (i == 10) cout << "[😔]";
-            else if (i == 15) cout << "[🔙]";
-            else if (i == 20) cout << "[🔄]";
-            else if (i == 25) cout << "[✋]";
+            if (i == 5) cout << "[⏩]";      // Avanca 3
+            else if (i == 10) cout << "[😔]"; // Perde vez
+            else if (i == 15) cout << "[🔙]"; // Volta 3
+            else if (i == 20) cout << "[🔄]"; // Joga novamente
+            else if (i == 25) cout << "[✋]"; // Espera ultrapassagem
             else cout << "[ ]";
         }
     }
-    cout << "\nLegenda: [⏩]=Avanca 3 | [😔]=Perde vez | [🔙]=Volta 3 | [🔄]=Joga outra | [✋]=Espera a ultrapassagem colega\n";
+    cout << "\nLegenda: [⏩]=Avanca 3 | [😔]=Perde vez | [🔙]=Volta 3 | [🔄]=Joga outra | [✋]=Espera ultrapassagem\n";
 }
 
 int main() {
@@ -66,19 +63,18 @@ int main() {
 
     int num;
     cout << "===== JOGO DA GLORIA =====\n";
-    
-    // Loop para garantir que o número de jogadores está entre 1 e 5
+
     do {
         cout << "Quantos jogadores? (1-5): ";
         cin >> num;
         cin.ignore();
-        
+
         if (num < 1 || num > 5) {
-            cout << "Numero invalido! Escolha entre 1 e 5 jogadores.\n";
+            cout << "Numero invalido! Escolhe entre 1 e 5 jogadores.\n";
         }
     } while (num < 1 || num > 5);
 
-    vector<Jogador> jogadores(num);
+    Jogador jogadores[5]; // maximo 5 jogadores
 
     for (int i = 0; i < num; i++) {
         cout << "Nome do jogador " << i + 1 << ": ";
@@ -89,12 +85,11 @@ int main() {
     int vez = 0;
 
     while (!acabou) {
-        mostrarTabuleiro(jogadores);
+        mostrarTabuleiro(jogadores, num);
 
         Jogador& atual = jogadores[vez];
 
-        // se estiver à espera dos outros
-        if (atual.esperaUltrapassagem && !todosUltrapassaram(atual, jogadores)) {
+        if (atual.esperaUltrapassagem && !todosUltrapassaram(atual, jogadores, num)) {
             cout << atual.nome << " ainda espera que todos o ultrapassem.\n";
         }
         else if (atual.perdeVez) {
@@ -103,7 +98,7 @@ int main() {
         }
         else {
             atual.esperaUltrapassagem = false;
-            cout << "\nE a vez de " << atual.nome << ". Clica ENTER para lancar o dado.";
+            cout << "\nE a vez de " << atual.nome << ". Carrega ENTER para lancar o dado.";
             cin.ignore();
 
             int valor = dado();
@@ -114,7 +109,6 @@ int main() {
             atual.pos += valor;
             if (atual.pos > 30) atual.pos = 30;
 
-            // casas especiais
             switch (atual.pos) {
                 case 5:
                     cout << "Casa especial (+3): avanca 3 casas!\n";
@@ -134,25 +128,23 @@ int main() {
                     cout << "Casa especial (J): joga novamente!\n";
                     break;
                 case 25:
-                    cout << "Casa especial (E): espera ate todos o ultrapassarem!\n";
+                    cout << "Casa especial (E): espera ate todos te ultrapassarem!\n";
                     atual.esperaUltrapassagem = true;
                     break;
             }
 
             if (atual.pos >= 30) {
                 limparEcra();
-                cout << "\n " << atual.nome << " 🏁 GG ez\n";
+                cout << "\n" << atual.nome << " chegou ao fim! 🏁 GG EZ!\n";
                 acabou = true;
                 break;
             }
-            
-            // Se não ganhou, mostra o tabuleiro atualizado
-            if (atual.pos != 20) { // Se não for a casa "joga novamente"
-                mostrarTabuleiro(jogadores);
+
+            if (atual.pos != 20) { // Se nao for "joga novamente"
+                mostrarTabuleiro(jogadores, num);
             }
         }
 
-        // Avança para o próximo jogador, exceto se for casa "joga novamente"
         if (atual.pos != 20 || acabou) {
             vez = (vez + 1) % num;
         }
