@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string>
+#include <string>  // permite usar funções do tipo .length()
 #include <cstdlib>
 #include <ctime>
 
@@ -70,6 +70,25 @@ void mostrarTabuleiro(Jogador jogadores[], int num) {
 
 int main() {
     srand(time(0)); // Inicializa o gerador de números aleatórios
+    limparEcra();
+
+    // 🧱 Tela de introdução / layout inicial
+    cout << "=============================================================\n";
+    cout << "                    🏆 JOGO DA GLÓRIA 🏆                   \n";
+    cout << "=============================================================\n";
+    cout << "Bem-vindo ao jogo mais lendário do terminal!\n";
+    cout << "Regras rápidas:\n";
+    cout << " - 🎲 Lança o dado e avança pelo tabuleiro (1 a 30)\n";
+    cout << " - ⏩ Casa 5: Avanças 3 casas\n";
+    cout << " - 😔 Casa 10: Perdes a próxima jogada\n";
+    cout << " - 🔙 Casa 15: Voltas 3 casas\n";
+    cout << " - 🔄 Casa 20: Jogas novamente\n";
+    cout << " - ✋ Casa 25: Esperas até todos te ultrapassarem\n";
+    cout << "=============================================================\n";
+    cout << "Carrega ENTER para começar...";
+    cin.ignore(); // Espera o jogador pressionar Enter
+
+    limparEcra();
 
     int num;
     cout << "===== JOGO DA GLORIA =====\n";
